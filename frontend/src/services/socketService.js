@@ -5,9 +5,24 @@ import { logout, setKicked } from '../store/userSlice';
 
 let socket = null;
 
+const getSocketUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return window.location.origin;
+  }
+  return 'http://localhost:8001';
+};
+
 export const connectSocket = (dispatch) => {
-  socket = io('http://localhost:8001', {
-    transports: ['websocket']
+  const socketUrl = getSocketUrl();
+  
+  socket = io(socketUrl, {
+    transports: ['websocket', 'polling'],
+    timeout: 20000,
+    forceNew: true,
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionAttempts: 5,
+    maxReconnectionAttempts: 5
   });
 
   socket.on('connect', () => {
